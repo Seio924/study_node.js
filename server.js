@@ -41,10 +41,19 @@ app.post("/add", async (req, res) => {
     if (req.body.title == "" || req.body.content == "") {
       res.send("제목 입력안함");
     } else {
-      await db
-        .collection("post")
-        .insertOne({ title: req.body.title, content: req.body.content });
-      res.redirect("/list");
+      if (req.body.id == null) {
+        await db
+          .collection("post")
+          .insertOne({ title: req.body.title, content: req.body.content });
+      } else {
+        await db
+          .collection("post")
+          .updateOne(
+            { _id: new ObjectId(req.body.id) },
+            { $set: { title: req.body.title, content: req.body.content } }
+          );
+      }
+      res.redirect("/");
     }
   } catch (e) {
     console.log(e);
@@ -68,9 +77,18 @@ app.get("/detail/:id", async (req, res) => {
   }
 });
 
-app.get("/edit:id", async (req, res) => {
-  let result = await db.collection.findOne({
-    _id: new ObjectId(req.params.id),
-  });
-  res.render("edit.ejs", { posts: result });
+app.get("/edit/:id", async (req, res) => {
+  try {
+    let result = await db.collection("post").findOne({
+      _id: new ObjectId(req.params.id),
+    });
+    if (result == null) {
+      res.status(400).send("url1");
+    } else {
+      res.render("edit.ejs", { posts: result });
+    }
+  } catch (e) {
+    console.log(e);
+    res.status(400).send("url");
+  }
 });
