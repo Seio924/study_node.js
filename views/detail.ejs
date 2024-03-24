@@ -7,8 +7,11 @@
     <link rel="stylesheet" href="/main.css" />
   </head>
   <body class="grey-bg">
-    <div class="white-bg">
-      <h4><%=servertime%></h4>
+    <%- include('nav.ejs') %>
+
+    <div class="detail-bg">
+      <h4><%= posts.title %></h4>
+      <p><%= posts.content%></p>
     </div>
   </body>
 </html>
