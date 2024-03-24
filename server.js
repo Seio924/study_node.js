@@ -3,6 +3,8 @@ const app = express();
 
 app.use(express.static(__dirname + "/public"));
 app.set("view engine", "ejs");
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 const { MongoClient } = require("mongodb");
 
@@ -27,10 +29,10 @@ app.get("/", (req, res) => {
   res.sendFile(__dirname + "/index.html");
 });
 
-app.get("/news", (req, res) => {
+app.get("/write", (req, res) => {
   //DB에 저장하기
   //db.collection("post").insertOne({ title: "어쩌구" });
-  res.send("뉴스");
+  res.render("write.ejs");
 });
 
 app.get("/list", async (req, res) => {
@@ -43,4 +45,20 @@ app.get("/time", (req, res) => {
   let time = new Date();
 
   res.render("time.ejs", { servertime: time });
+});
+
+app.post("/add", async (req, res) => {
+  try {
+    if (req.body.title == "" || req.body.content == "") {
+      res.send("제목 입력안함");
+    } else {
+      await db
+        .collection("post")
+        .insertOne({ title: req.body.title, content: req.body.content });
+      res.redirect("/list");
+    }
+  } catch (e) {
+    console.log(e);
+    res.status(500).send("서버 에러");
+  }
 });
